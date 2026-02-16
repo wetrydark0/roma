@@ -2,132 +2,207 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Рома Рандом ✨</title>
     <style>
+        * { box-sizing: border-box; }
+        
         body {
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #1a1a1a;
             background: radial-gradient(circle, #2c3e50 0%, #000000 100%);
             font-family: 'Segoe UI', sans-serif;
             color: white;
             text-align: center;
+            overflow-x: hidden; /* Захист від вилізання за екран */
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 400px;
-            width: 90%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            width: 95%;
+            max-width: 420px;
+            margin: 10px;
+            transition: all 0.5s ease;
         }
+
+        .lang-switch {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        h1 { font-size: 22px; margin-bottom: 20px; }
 
         #magicButton {
             background: linear-gradient(45deg, #e74c3c, #c0392b);
             color: white;
             border: none;
-            padding: 20px;
+            padding: 18px;
             font-size: 18px;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
             width: 100%;
-            margin-top: 20px;
+            transition: 0.3s;
         }
 
-        #magicButton:disabled { background: #555; cursor: not-allowed; }
+        #magicButton:disabled { background: #444; opacity: 0.6; }
 
-        #result { margin-top: 20px; display: none; }
+        #result { 
+            margin-top: 20px; 
+            display: none; 
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
 
         #randomImage {
             width: 100%;
+            max-height: 60vh; /* Щоб фото не було більшим за екран */
+            object-fit: contain;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
-        #caption { font-size: 20px; font-weight: bold; margin-top: 10px; }
+        #rarityLabel { margin-top: 15px; font-weight: bold; font-size: 14px; }
+        #caption { font-size: 18px; font-weight: bold; margin-top: 8px; }
+
+        /* Анімація при появі */
+        .fade-in { opacity: 1 !important; display: block !important; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h1>Випробуй свою удачу!</h1>
-        <button id="magicButton">Завантаження...</button>
+        <div class="lang-switch">
+            <button class="lang-btn" onclick="setLang('uk')">UA</button>
+            <button class="lang-btn" onclick="setLang('ru')">RU</button>
+        </div>
+
+        <h1 id="ui-title">Випробуй свою удачу!</h1>
+        
+        <button id="magicButton">ОТРИМАТИ РОМУ 🎲</button>
 
         <div id="result">
             <img id="randomImage" src="" alt="Рома">
-            <div id="rarityLabel" style="margin-top:10px; font-weight:bold;"></div>
+            <div id="rarityLabel"></div>
             <p id="caption"></p>
         </div>
     </div>
 
     <script>
+        let currentLang = 'uk';
+        const COOLDOWN = 5000;
+
         const data = {
             common: [
-                { img: "obphoto1.jpg", txt: "Рома сдается" }, { img: "obphoto2.jpg", txt: "Рома улыбается" },
-                { img: "obphoto3.jpg", txt: "Рома смотрит на тебя" }, { img: "obphoto4.jpg", txt: "Рома нажымает" },
-                { img: "obphoto5.jpg", txt: "Рома показывает свое плече" }, { img: "obphoto6.jpg", txt: "Рома в темноте" },
-                { img: "obphoto7.jpg", txt: "Рома збоку" }, { img: "obphoto8.jpg", txt: "Рома просто" },
-                { img: "obphoto9.jpg", txt: "Рома в СССР" }, { img: "obphoto10.jpg", txt: "Рома серьезный" }
+                { img: "obphoto1.jpg", uk: "Рома здається", ru: "Рома сдается" },
+                { img: "obphoto2.jpg", uk: "Рома посміхається", ru: "Рома улыбается" },
+                { img: "obphoto3.jpg", uk: "Рома дивиться на тебе", ru: "Рома смотрит на тебя" },
+                { img: "obphoto4.jpg", uk: "Рома натискає", ru: "Рома нажимает" },
+                { img: "obphoto5.jpg", uk: "Рома показує своє плече", ru: "Рома показывает свое плечо" },
+                { img: "obphoto6.jpg", uk: "Рома в темряві", ru: "Рома в темноте" },
+                { img: "obphoto7.jpg", uk: "Рома збоку", ru: "Рома сбоку" },
+                { img: "obphoto8.jpg", uk: "Рома просто", ru: "Рома просто" },
+                { img: "obphoto9.jpg", uk: "Рома в СРСР", ru: "Рома в СССР" },
+                { img: "obphoto10.jpg", uk: "Рома серйозний", ru: "Рома серьезный" }
             ],
             rare: [
-                { img: "redphoto1.jpg", txt: "Рома умер" }, { img: "redphoto2.jpg", txt: "Рома срет" },
-                { img: "redphoto3.jpg", txt: "Рома в сердечках" }, { img: "redphoto4.jpg", txt: "Рома страшно улыбается" },
-                { img: "redphoto5.jpg", txt: "Рома вблизи" }, { img: "redphoto6.jpg", txt: "Рома смотрит на салют" },
-                { img: "redphoto7.jpg", txt: "Рома большой" }, { img: "redphoto8.jpg", txt: "Рома с училкой" },
-                { img: "redphoto9.jpg", txt: "Рома стреляет в друзей" }, { img: "redphoto10.jpg", txt: "Рома в маске" },
-                { img: "redphoto11.jpg", txt: "Рома няшка" }
+                { img: "redphoto1.jpg", uk: "Рома помер", ru: "Рома умер" },
+                { img: "redphoto2.jpg", uk: "Рома сере", ru: "Рома срет" },
+                { img: "redphoto3.jpg", uk: "Рома в сердечках", ru: "Рома в сердечках" },
+                { img: "redphoto4.jpg", uk: "Рома страшно посміхається", ru: "Рома страшно улыбается" },
+                { img: "redphoto5.jpg", uk: "Рома зблизька", ru: "Рома вблизи" },
+                { img: "redphoto6.jpg", uk: "Рома дивиться на салют", ru: "Рома смотрит на салют" },
+                { img: "redphoto7.jpg", uk: "Рома великий", ru: "Рома большой" },
+                { img: "redphoto8.jpg", uk: "Рома з вчителькою", ru: "Рома с училкой" },
+                { img: "redphoto9.jpg", uk: "Рома стріляє в друзів", ru: "Рома стреляет в друзей" },
+                { img: "redphoto10.jpg", uk: "Рома в масці", ru: "Рома в маске" },
+                { img: "redphoto11.jpg", uk: "Рома няшка", ru: "Рома няшка" }
             ],
             legendary: [
-                { img: "legphoto1.jpg", txt: "Рома с Эпштейном" }, { img: "legphoto2.jpg", txt: "Рома качок" },
-                { img: "legphoto3.jpg", txt: "Рома фембойчик" }, { img: "legphoto4.jpg", txt: "Рома пикми" },
-                { img: "legphoto5.jpg", txt: "Рома котик" }, { img: "legphoto6.jpg", txt: "Рома пикми зайчик" },
-                { img: "legphoto7.jpg", txt: "Рома няшка в сердечках" }, { img: "legphoto8.jpg", txt: "Рома собачка" },
-                { img: "legphoto9.jpg", txt: "Рома няшка кушает пряник" }, { img: "legphoto10.jpg", txt: "Рома краш и его кент краш" }
+                { img: "legphoto1.jpg", uk: "Рома з Епштейном", ru: "Рома с Эпштейном" },
+                { img: "legphoto2.jpg", uk: "Рома качок", ru: "Рома качок" },
+                { img: "legphoto3.jpg", uk: "Рома фембойчик", ru: "Рома фембойчик" },
+                { img: "legphoto4.jpg", uk: "Рома пікмі", ru: "Рома пикми" },
+                { img: "legphoto5.jpg", uk: "Рома котик", ru: "Рома котик" },
+                { img: "legphoto6.jpg", uk: "Рома пікмі зайчик", ru: "Рома пикми зайчик" },
+                { img: "legphoto7.jpg", uk: "Рома няшка в сердечках", ru: "Рома няшка в сердечках" },
+                { img: "legphoto8.jpg", uk: "Рома собачка", ru: "Рома собачка" },
+                { img: "legphoto9.jpg", uk: "Рома няшка їсть пряник", ru: "Рома няшка кушает пряник" },
+                { img: "legphoto10.jpg", uk: "Рома краш і його кент краш", ru: "Рома краш и его кент краш" }
             ]
         };
 
+        const ui = {
+            uk: { title: "Випробуй свою удачу!", btn: "ОТРИМАТИ РОМУ 🎲", wait: "Зачекай: ", common: "⚪ ЗВИЧАЙНЕ", rare: "💎 РІДКІСНЕ", leg: "🌟 ЛЕГЕНДАРКА" },
+            ru: { title: "Испытай свою удачу!", btn: "ПОЛУЧИТЬ РОМУ 🎲", wait: "Подожди: ", common: "⚪ ОБЫЧНОЕ", rare: "💎 РЕДКОЕ", leg: "🌟 ЛЕГЕНДАРКА" }
+        };
+
         const btn = document.getElementById('magicButton');
-        const COOLDOWN = 5 * 1000; // КД змінено на 5 секунд
+        const resDiv = document.getElementById('result');
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('ui-title').innerText = ui[lang].title;
+            update();
+        }
 
         function update() {
             const last = localStorage.getItem('roma_roll');
             if (last) {
                 const diff = new Date().getTime() - parseInt(last);
                 if (diff < COOLDOWN) {
-                    const rem = COOLDOWN - diff;
+                    const rem = Math.ceil((COOLDOWN - diff) / 1000);
                     btn.disabled = true;
-                    btn.innerText = `Зачекай: ${Math.ceil(rem/1000)}с`;
-                    setTimeout(update, 100);
+                    btn.innerText = ui[currentLang].wait + rem + "с";
+                    setTimeout(update, 1000);
                     return;
                 }
             }
             btn.disabled = false;
-            btn.innerText = "ОТРИМАТИ РОМУ 🎲";
+            btn.innerText = ui[currentLang].btn;
         }
 
         btn.addEventListener('click', () => {
-            localStorage.setItem('roma_roll', new Date().getTime());
-            const roll = Math.floor(Math.random() * 100) + 1;
-            let pool, rN, rC;
+            resDiv.classList.remove('fade-in'); // Плавне зникнення попереднього
+            
+            setTimeout(() => {
+                localStorage.setItem('roma_roll', new Date().getTime());
+                const roll = Math.floor(Math.random() * 100) + 1;
+                let pool, rN, rC;
 
-            if (roll <= 5) { pool = data.legendary; rN = "🌟 ЛЕГЕНДАРКА"; rC = "#ffae00"; }
-            else if (roll <= 40) { pool = data.rare; rN = "💎 РІДКІСНЕ"; rC = "#a335ee"; }
-            else { pool = data.common; rN = "⚪ ЗВИЧАЙНЕ"; rC = "#aaaaaa"; }
+                if (roll <= 5) { pool = data.legendary; rN = ui[currentLang].leg; rC = "#ffae00"; }
+                else if (roll <= 40) { pool = data.rare; rN = ui[currentLang].rare; rC = "#a335ee"; }
+                else { pool = data.common; rN = ui[currentLang].common; rC = "#aaaaaa"; }
 
-            const item = pool[Math.floor(Math.random() * pool.length)];
-            document.getElementById('result').style.display = "block";
-            document.getElementById('randomImage').src = "images/" + item.img;
-            document.getElementById('caption').innerText = item.txt;
-            document.getElementById('rarityLabel').innerText = rN;
-            document.getElementById('rarityLabel').style.color = rC;
-            update();
+                const item = pool[Math.floor(Math.random() * pool.length)];
+                
+                document.getElementById('randomImage').src = "images/" + item.img;
+                document.getElementById('caption').innerText = item[currentLang];
+                document.getElementById('rarityLabel').innerText = rN;
+                document.getElementById('rarityLabel').style.color = rC;
+                
+                resDiv.classList.add('fade-in'); // Плавна поява
+                update();
+            }, 100);
         });
 
         update();
