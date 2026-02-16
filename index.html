@@ -206,7 +206,7 @@
 
     <script>
         let currentLang = 'uk';
-        const COOLDOWN = 5 * 60 * 1000; // КД змінено на 5 хвилин
+        const COOLDOWN = 10 * 1000; // КД змінено на 10 секунд
 
         const data = {
             common: [
@@ -279,11 +279,9 @@
             if (last) {
                 const diff = new Date().getTime() - parseInt(last);
                 if (diff < COOLDOWN) {
-                    const rem = COOLDOWN - diff;
-                    const mins = Math.floor(rem / 60000);
-                    const secs = Math.ceil((rem % 60000) / 1000);
+                    const rem = Math.ceil((COOLDOWN - diff) / 1000);
                     btn.disabled = true;
-                    btn.innerText = ui[currentLang].wait + mins + "M " + (secs < 10 ? '0' : '') + secs + "S";
+                    btn.innerText = ui[currentLang].wait + rem + "S";
                     setTimeout(updateStatus, 1000);
                     return;
                 }
