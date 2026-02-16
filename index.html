@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рома Рандом ✨</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a1a; /* Темний фон, щоб точно бачити, що сайт завантажився */
+            background: radial-gradient(circle, #2c3e50 0%, #000000 100%);
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            text-align: center;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        #magicButton {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #magicButton:disabled { background: #555; cursor: not-allowed; }
+
+        #result { margin-top: 20px; display: none; }
+
+        #randomImage {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        #caption { font-size: 20px; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Випробуй свою удачу!</h1>
+        <button id="magicButton">Завантаження...</button>
+
+        <div id="result">
+            <img id="randomImage" src="" alt="Рома">
+            <div id="rarityLabel" style="margin-top:10px; font-weight:bold;"></div>
+            <p id="caption"></p>
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            common: [
+                { img: "obphoto1.jpg", txt: "Рома сдается" }, { img: "obphoto2.jpg", txt: "Рома улыбается" },
+                { img: "obphoto3.jpg", txt: "Рома смотрит на тебя" }, { img: "obphoto4.jpg", txt: "Рома нажымает" },
+                { img: "obphoto5.jpg", txt: "Рома показывает свое плече" }, { img: "obphoto6.jpg", txt: "Рома в темноте" },
+                { img: "obphoto7.jpg", txt: "Рома збоку" }, { img: "obphoto8.jpg", txt: "Рома просто" },
+                { img: "obphoto9.jpg", txt: "Рома в СССР" }, { img: "obphoto10.jpg", txt: "Рома серьезный" }
+            ],
+            rare: [
+                { img: "redphoto1.jpg", txt: "Рома умер" }, { img: "redphoto2.jpg", txt: "Рома срет" },
+                { img: "redphoto3.jpg", txt: "Рома в сердечках" }, { img: "redphoto4.jpg", txt: "Рома страшно улыбается" },
+                { img: "redphoto5.jpg", txt: "Рома вблизи" }, { img: "redphoto6.jpg", txt: "Рома смотрит на салют" },
+                { img: "redphoto7.jpg", txt: "Рома большой" }, { img: "redphoto8.jpg", txt: "Рома с училкой" },
+                { img: "redphoto9.jpg", txt: "Рома стреляет в друзей" }, { img: "redphoto10.jpg", txt: "Рома в маске" },
+                { img: "redphoto11.jpg", txt: "Рома няшка" }
+            ],
+            legendary: [
+                { img: "legphoto1.jpg", txt: "Рома с Эпштейном" }, { img: "legphoto2.jpg", txt: "Рома качок" },
+                { img: "legphoto3.jpg", txt: "Рома фембойчик" }, { img: "legphoto4.jpg", txt: "Рома пикми" },
+                { img: "legphoto5.jpg", txt: "Рома котик" }, { img: "legphoto6.jpg", txt: "Рома пикми зайчик" },
+                { img: "legphoto7.jpg", txt: "Рома няшка в сердечках" }, { img: "legphoto8.jpg", txt: "Рома собачка" },
+                { img: "legphoto9.jpg", txt: "Рома няшка кушает пряник" }, { img: "legphoto10.jpg", txt: "Рома краш и его кент краш" }
+            ]
+        };
+
+        const btn = document.getElementById('magicButton');
+        const COOLDOWN = 30 * 60 * 1000;
+
+        function update() {
+            const last = localStorage.getItem('roma_roll');
+            if (last) {
+                const diff = new Date().getTime() - parseInt(last);
+                if (diff < COOLDOWN) {
+                    const rem = COOLDOWN - diff;
+                    btn.disabled = true;
+                    btn.innerText = `КД: ${Math.floor(rem/60000)}хв ${Math.floor((rem%60000)/1000)}с`;
+                    setTimeout(update, 1000);
+                    return;
+                }
+            }
+            btn.disabled = false;
+            btn.innerText = "ОТРИМАТИ РОМУ 🎲";
+        }
+
+        btn.addEventListener('click', () => {
+            localStorage.setItem('roma_roll', new Date().getTime());
+            const roll = Math.floor(Math.random() * 100) + 1;
+            let pool, rN, rC;
+
+            if (roll <= 5) { pool = data.legendary; rN = "🌟 ЛЕГЕНДАРКА"; rC = "#ffae00"; }
+            else if (roll <= 40) { pool = data.rare; rN = "💎 РІДКІСНЕ"; rC = "#a335ee"; }
+            else { pool = data.common; rN = "⚪ ЗВИЧАЙНЕ"; rC = "#aaaaaa"; }
+
+            const item = pool[Math.floor(Math.random() * pool.length)];
+            document.getElementById('result').style.display = "block";
+            document.getElementById('randomImage').src = "images/" + item.img;
+            document.getElementById('caption').innerText = item.txt;
+            document.getElementById('rarityLabel').innerText = rN;
+            document.getElementById('rarityLabel').style.color = rC;
+            update();
+        });
+
+        update();
+    </script>
+</body>
+</html>
