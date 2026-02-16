@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Рома Рандом ✨</title>
+    <title>ROMA GACHA PREMIUM ✨</title>
     <style>
-        * { box-sizing: border-box; }
+        :root {
+            --primary: #ff4d6d;
+            --common: #b2bec3;
+            --rare: #a335ee;
+            --legendary: #ffae00;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
             margin: 0;
@@ -13,98 +20,174 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: radial-gradient(circle, #2c3e50 0%, #000000 100%);
-            font-family: 'Segoe UI', sans-serif;
+            background: #0f0c29;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            font-family: 'Montserrat', 'Segoe UI', sans-serif;
             color: white;
-            text-align: center;
-            overflow-x: hidden; /* Захист від вилізання за екран */
+            overflow: hidden;
+        }
+
+        /* Анімований фон */
+        .bg-animate {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, rgba(76, 0, 255, 0.1) 0%, transparent 50%);
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            padding: 20px;
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            width: 95%;
-            max-width: 420px;
-            margin: 10px;
-            transition: all 0.5s ease;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 25px;
+            border-radius: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 92%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            position: relative;
+            animation: cardEntrance 0.8s ease-out;
         }
 
-        .lang-switch {
+        /* Новий перемикач мови */
+        .lang-container {
             display: flex;
-            justify-content: flex-end;
-            margin-bottom: 15px;
-            gap: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px;
+            border-radius: 15px;
+            width: fit-content;
+            margin: 0 auto 20px auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .lang-btn {
-            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
             border: none;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 10px;
+            border-radius: 12px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
             cursor: pointer;
-            font-size: 12px;
-        }
-
-        h1 { font-size: 22px; margin-bottom: 20px; }
-
-        #magicButton {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            color: white;
-            border: none;
-            padding: 18px;
-            font-size: 18px;
             font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.3s;
+            font-size: 13px;
+            transition: all 0.3s;
         }
 
-        #magicButton:disabled { background: #444; opacity: 0.6; }
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.3);
+        }
 
-        #result { 
-            margin-top: 20px; 
-            display: none; 
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+        h1 { 
+            font-size: 20px; 
+            margin: 0 0 25px 0; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .img-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.2);
+            display: none;
+            position: relative;
+            margin-bottom: 20px;
         }
 
         #randomImage {
             width: 100%;
-            max-height: 60vh; /* Щоб фото не було більшим за екран */
-            object-fit: contain;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        #rarityLabel { margin-top: 15px; font-weight: bold; font-size: 14px; }
-        #caption { font-size: 18px; font-weight: bold; margin-top: 8px; }
+        #magicButton {
+            background: linear-gradient(45deg, #ff4d6d, #ff758c);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 16px;
+            font-weight: 900;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(255, 77, 109, 0.3);
+        }
 
-        /* Анімація при появі */
-        .fade-in { opacity: 1 !important; display: block !important; }
+        #magicButton:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 77, 109, 0.5);
+        }
+
+        #magicButton:disabled {
+            background: #2d3436;
+            box-shadow: none;
+            color: #636e72;
+            cursor: not-allowed;
+        }
+
+        #rarityLabel {
+            font-size: 12px;
+            font-weight: 900;
+            margin-bottom: 5px;
+            letter-spacing: 3px;
+        }
+
+        #caption {
+            font-size: 18px;
+            margin: 0;
+            font-weight: 600;
+            color: #eee;
+        }
+
+        /* Ефекти для рідкісності */
+        .legendary-glow { box-shadow: 0 0 30px var(--legendary) !important; border: 2px solid var(--legendary) !important; }
+        .rare-glow { box-shadow: 0 0 30px var(--rare) !important; border: 2px solid var(--rare) !important; }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .show { display: block !important; animation: fadeIn 0.5s forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
 
+    <div class="bg-animate"></div>
+
     <div class="card">
-        <div class="lang-switch">
-            <button class="lang-btn" onclick="setLang('uk')">UA</button>
-            <button class="lang-btn" onclick="setLang('ru')">RU</button>
+        <div class="lang-container">
+            <button id="ua-btn" class="lang-btn active" onclick="setLang('uk')">UA</button>
+            <button id="ru-btn" class="lang-btn" onclick="setLang('ru')">RU</button>
         </div>
 
-        <h1 id="ui-title">Випробуй свою удачу!</h1>
+        <h1 id="ui-title">CHOOSE YOUR ROMA</h1>
         
-        <button id="magicButton">ОТРИМАТИ РОМУ 🎲</button>
+        <div id="resDiv" class="img-container">
+            <img id="randomImage" src="" alt="Roma">
+        </div>
 
-        <div id="result">
-            <img id="randomImage" src="" alt="Рома">
+        <div id="textGroup" style="display: none; margin-bottom: 20px;">
             <div id="rarityLabel"></div>
             <p id="caption"></p>
         </div>
+        
+        <button id="magicButton">GET SURPRISE 🎲</button>
     </div>
 
     <script>
@@ -152,28 +235,31 @@
         };
 
         const ui = {
-            uk: { title: "Випробуй свою удачу!", btn: "ОТРИМАТИ РОМУ 🎲", wait: "Зачекай: ", common: "⚪ ЗВИЧАЙНЕ", rare: "💎 РІДКІСНЕ", leg: "🌟 ЛЕГЕНДАРКА" },
-            ru: { title: "Испытай свою удачу!", btn: "ПОЛУЧИТЬ РОМУ 🎲", wait: "Подожди: ", common: "⚪ ОБЫЧНОЕ", rare: "💎 РЕДКОЕ", leg: "🌟 ЛЕГЕНДАРКА" }
+            uk: { title: "ВИБЕРИ СВОГО РОМУ", btn: "ОТРИМАТИ 🎲", wait: "ЗАЧЕКАЙ: ", common: "ЗВИЧАЙНИЙ", rare: "💎 РІДКІСНИЙ 💎", leg: "🔥 ЛЕГЕНДАРНИЙ 🔥" },
+            ru: { title: "ВЫБЕРИ СВОЕГО РОМУ", btn: "ПОЛУЧИТЬ 🎲", wait: "ПОДОЖДИ: ", common: "ОБЫЧНЫЙ", rare: "💎 РЕДКИЙ 💎", leg: "🔥 ЛЕГЕНДАРНЫЙ 🔥" }
         };
 
         const btn = document.getElementById('magicButton');
-        const resDiv = document.getElementById('result');
+        const imgCont = document.getElementById('resDiv');
+        const textGroup = document.getElementById('textGroup');
 
         function setLang(lang) {
             currentLang = lang;
+            document.getElementById('ua-btn').classList.toggle('active', lang === 'uk');
+            document.getElementById('ru-btn').classList.toggle('active', lang === 'ru');
             document.getElementById('ui-title').innerText = ui[lang].title;
-            update();
+            updateStatus();
         }
 
-        function update() {
+        function updateStatus() {
             const last = localStorage.getItem('roma_roll');
             if (last) {
                 const diff = new Date().getTime() - parseInt(last);
                 if (diff < COOLDOWN) {
                     const rem = Math.ceil((COOLDOWN - diff) / 1000);
                     btn.disabled = true;
-                    btn.innerText = ui[currentLang].wait + rem + "с";
-                    setTimeout(update, 1000);
+                    btn.innerText = ui[currentLang].wait + rem + "S";
+                    setTimeout(updateStatus, 1000);
                     return;
                 }
             }
@@ -182,30 +268,41 @@
         }
 
         btn.addEventListener('click', () => {
-            resDiv.classList.remove('fade-in'); // Плавне зникнення попереднього
+            btn.disabled = true;
+            localStorage.setItem('roma_roll', new Date().getTime());
             
+            const roll = Math.floor(Math.random() * 100) + 1;
+            let pool, rN, rColor, glowClass;
+
+            if (roll <= 5) { pool = data.legendary; rN = ui[currentLang].leg; rColor = "#ffae00"; glowClass = "legendary-glow"; }
+            else if (roll <= 40) { pool = data.rare; rN = ui[currentLang].rare; rColor = "#a335ee"; glowClass = "rare-glow"; }
+            else { pool = data.common; rN = ui[currentLang].common; rColor = "#b2bec3"; glowClass = ""; }
+
+            const item = pool[Math.floor(Math.random() * pool.length)];
+            
+            // Скидання класів та анімацій
+            imgCont.className = "img-container";
+            imgCont.classList.remove('show');
+            textGroup.style.display = 'none';
+
             setTimeout(() => {
-                localStorage.setItem('roma_roll', new Date().getTime());
-                const roll = Math.floor(Math.random() * 100) + 1;
-                let pool, rN, rC;
-
-                if (roll <= 5) { pool = data.legendary; rN = ui[currentLang].leg; rC = "#ffae00"; }
-                else if (roll <= 40) { pool = data.rare; rN = ui[currentLang].rare; rC = "#a335ee"; }
-                else { pool = data.common; rN = ui[currentLang].common; rC = "#aaaaaa"; }
-
-                const item = pool[Math.floor(Math.random() * pool.length)];
+                const photo = document.getElementById('randomImage');
+                photo.src = "images/" + item.img;
                 
-                document.getElementById('randomImage').src = "images/" + item.img;
                 document.getElementById('caption').innerText = item[currentLang];
-                document.getElementById('rarityLabel').innerText = rN;
-                document.getElementById('rarityLabel').style.color = rC;
+                const label = document.getElementById('rarityLabel');
+                label.innerText = rN;
+                label.style.color = rColor;
                 
-                resDiv.classList.add('fade-in'); // Плавна поява
-                update();
-            }, 100);
+                if(glowClass) imgCont.classList.add(glowClass);
+                imgCont.classList.add('show');
+                textGroup.style.display = 'block';
+                
+                updateStatus();
+            }, 50);
         });
 
-        update();
+        updateStatus();
     </script>
 </body>
 </html>
