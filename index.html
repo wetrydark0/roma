@@ -136,7 +136,7 @@
             border-radius: 15px;
             cursor: pointer;
             text-transform: uppercase;
-            display: none; /* Ховаємо спочатку */
+            display: none;
             transition: 0.3s;
         }
 
@@ -206,7 +206,7 @@
 
     <script>
         let currentLang = 'uk';
-        const COOLDOWN = 5000;
+        const COOLDOWN = 5 * 60 * 1000; // КД змінено на 5 хвилин
 
         const data = {
             common: [
@@ -279,9 +279,11 @@
             if (last) {
                 const diff = new Date().getTime() - parseInt(last);
                 if (diff < COOLDOWN) {
-                    const rem = Math.ceil((COOLDOWN - diff) / 1000);
+                    const rem = COOLDOWN - diff;
+                    const mins = Math.floor(rem / 60000);
+                    const secs = Math.ceil((rem % 60000) / 1000);
                     btn.disabled = true;
-                    btn.innerText = ui[currentLang].wait + rem + "S";
+                    btn.innerText = ui[currentLang].wait + mins + "M " + (secs < 10 ? '0' : '') + secs + "S";
                     setTimeout(updateStatus, 1000);
                     return;
                 }
@@ -317,7 +319,7 @@
                 if(glowClass) imgCont.classList.add(glowClass);
                 imgCont.classList.add('show');
                 textGroup.style.display = 'block';
-                menuBtn.style.display = 'block'; // Показуємо кнопку меню
+                menuBtn.style.display = 'block';
                 
                 updateStatus();
             }, 50);
