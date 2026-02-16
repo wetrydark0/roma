@@ -27,7 +27,6 @@
             overflow: hidden;
         }
 
-        /* Анімований фон */
         .bg-animate {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -47,9 +46,9 @@
             box-shadow: 0 25px 50px rgba(0,0,0,0.5);
             position: relative;
             animation: cardEntrance 0.8s ease-out;
+            text-align: center;
         }
 
-        /* Новий перемикач мови */
         .lang-container {
             display: flex;
             background: rgba(0, 0, 0, 0.3);
@@ -104,7 +103,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         #magicButton {
@@ -116,16 +120,24 @@
             font-weight: 900;
             border-radius: 20px;
             cursor: pointer;
-            width: 100%;
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s;
             box-shadow: 0 10px 20px rgba(255, 77, 109, 0.3);
         }
 
-        #magicButton:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(255, 77, 109, 0.5);
+        #menuButton {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 15px;
+            cursor: pointer;
+            text-transform: uppercase;
+            display: none; /* Ховаємо спочатку */
+            transition: 0.3s;
         }
 
         #magicButton:disabled {
@@ -144,12 +156,11 @@
 
         #caption {
             font-size: 18px;
-            margin: 0;
+            margin: 0 0 20px 0;
             font-weight: 600;
             color: #eee;
         }
 
-        /* Ефекти для рідкісності */
         .legendary-glow { box-shadow: 0 0 30px var(--legendary) !important; border: 2px solid var(--legendary) !important; }
         .rare-glow { box-shadow: 0 0 30px var(--rare) !important; border: 2px solid var(--rare) !important; }
 
@@ -182,12 +193,15 @@
             <img id="randomImage" src="" alt="Roma">
         </div>
 
-        <div id="textGroup" style="display: none; margin-bottom: 20px;">
+        <div id="textGroup" style="display: none;">
             <div id="rarityLabel"></div>
             <p id="caption"></p>
         </div>
         
-        <button id="magicButton">GET SURPRISE 🎲</button>
+        <div class="btn-group">
+            <button id="magicButton">GET SURPRISE 🎲</button>
+            <button id="menuButton" onclick="goMenu()">Menu</button>
+        </div>
     </div>
 
     <script>
@@ -235,11 +249,12 @@
         };
 
         const ui = {
-            uk: { title: "ВИБЕРИ СВОГО РОМУ", btn: "ОТРИМАТИ 🎲", wait: "ЗАЧЕКАЙ: ", common: "ЗВИЧАЙНИЙ", rare: "💎 РІДКІСНИЙ 💎", leg: "🔥 ЛЕГЕНДАРНИЙ 🔥" },
-            ru: { title: "ВЫБЕРИ СВОЕГО РОМУ", btn: "ПОЛУЧИТЬ 🎲", wait: "ПОДОЖДИ: ", common: "ОБЫЧНЫЙ", rare: "💎 РЕДКИЙ 💎", leg: "🔥 ЛЕГЕНДАРНЫЙ 🔥" }
+            uk: { title: "ВИБЕРИ СВОГО РОМУ", btn: "ОТРИМАТИ 🎲", wait: "ЗАЧЕКАЙ: ", menu: "В МЕНЮ", common: "ЗВИЧАЙНИЙ", rare: "💎 РІДКІСНИЙ 💎", leg: "🔥 ЛЕГЕНДАРНИЙ 🔥" },
+            ru: { title: "ВЫБЕРИ СВОЕГО РОМУ", btn: "ПОЛУЧИТЬ 🎲", wait: "ПОДОЖДИ: ", menu: "В МЕНЮ", common: "ОБЫЧНЫЙ", rare: "💎 РЕДКИЙ 💎", leg: "🔥 ЛЕГЕНДАРНЫЙ 🔥" }
         };
 
         const btn = document.getElementById('magicButton');
+        const menuBtn = document.getElementById('menuButton');
         const imgCont = document.getElementById('resDiv');
         const textGroup = document.getElementById('textGroup');
 
@@ -248,7 +263,15 @@
             document.getElementById('ua-btn').classList.toggle('active', lang === 'uk');
             document.getElementById('ru-btn').classList.toggle('active', lang === 'ru');
             document.getElementById('ui-title').innerText = ui[lang].title;
+            menuBtn.innerText = ui[lang].menu;
             updateStatus();
+        }
+
+        function goMenu() {
+            imgCont.classList.remove('show');
+            textGroup.style.display = 'none';
+            menuBtn.style.display = 'none';
+            imgCont.style.display = 'none';
         }
 
         function updateStatus() {
@@ -280,15 +303,12 @@
 
             const item = pool[Math.floor(Math.random() * pool.length)];
             
-            // Скидання класів та анімацій
             imgCont.className = "img-container";
             imgCont.classList.remove('show');
             textGroup.style.display = 'none';
 
             setTimeout(() => {
-                const photo = document.getElementById('randomImage');
-                photo.src = "images/" + item.img;
-                
+                document.getElementById('randomImage').src = "images/" + item.img;
                 document.getElementById('caption').innerText = item[currentLang];
                 const label = document.getElementById('rarityLabel');
                 label.innerText = rN;
@@ -297,12 +317,13 @@
                 if(glowClass) imgCont.classList.add(glowClass);
                 imgCont.classList.add('show');
                 textGroup.style.display = 'block';
+                menuBtn.style.display = 'block'; // Показуємо кнопку меню
                 
                 updateStatus();
             }, 50);
         });
 
-        updateStatus();
+        setLang('uk');
     </script>
 </body>
 </html>
